@@ -157,10 +157,19 @@ std::string Encode(const std::span<const std::uint8_t> input)
     std::size_t group_size = 0;                 // How many octets in group
 
     // Just return an empty string if the input is empty
-    if (input.size() == 0) return {};
+    if (input.empty()) return {};
 
     // Reserve space for output
-    output.reserve(input.size() * 1.5 + 0.5);
+    if ((input.size() & 1) == 0)
+    {
+        // Even size = input size + (input size / 2)
+        output.reserve(input.size() + (input.size() >> 1));
+    }
+    else
+    {
+        // Even size = input size + (input size / 2) + 1
+        output.reserve(input.size() + (input.size() >> 1) + 1);
+    }
 
     // Iterate over the input string to form 16-bit groups
     for (const uint8_t octet : input)
@@ -229,10 +238,11 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
     std::uint_fast32_t group_size = 0;          // How many octets in group
 
     // Just return an empty string if the input is empty
-    if (input.size() == 0) return {};
+    if (input.empty()) return {};
 
-    // Reserve space for output
-    output.reserve(input.size() / 1.5);
+    // Reserve space for output (= input size / 1.5)
+    output.reserve(
+        static_cast<std::size_t>(static_cast<double>(input.size()) / 1.5));
 
     // Iterate over the input string
     for (const char c : input)
@@ -280,10 +290,6 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
         // Compute the octet value to convert
         output.push_back((((group >> 8) & 0xff) +
                           ((group     ) & 0xff) * 45) & 0xff);
-
-        // Reset group data
-        group_size = 0;
-        group = 0;
     }
 
     return output;

@@ -23,15 +23,18 @@
 namespace Terra::Base16
 {
 
+namespace
+{
+
 // Define the table used for converting to Base16
-static const char Base16Table[16] =
+const char Base16Table[16] =
 {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C',
     'D', 'E', 'F'
 };
 
 // Define an value to represent an invalid Base16 character
-static constexpr std::uint8_t InvalidBase16Character = 255;
+constexpr std::uint8_t InvalidBase16Character = 255;
 
 // Use the C pre-processor to define a macro that will tell us the integer
 // value for any given Base16 character
@@ -44,7 +47,7 @@ static constexpr std::uint8_t InvalidBase16Character = 255;
     (x) == 'e' ? 14 : (x) == 'f' ? 15 : InvalidBase16Character)
 
 // Define the table for converting from Base16 characters to integer values
-static const std::uint8_t Base16ReverseTable[256] =
+const std::uint8_t Base16ReverseTable[256] =
 {
     B16ToInt(0),   B16ToInt(1),   B16ToInt(2),   B16ToInt(3),   B16ToInt(4),
     B16ToInt(5),   B16ToInt(6),   B16ToInt(7),   B16ToInt(8),   B16ToInt(9),
@@ -100,6 +103,8 @@ static const std::uint8_t Base16ReverseTable[256] =
     B16ToInt(255)
 };
 
+} // namespace
+
 /*
  *  Encode
  *
@@ -147,7 +152,7 @@ std::string Encode(const std::span<const std::uint8_t> input)
     std::string output;                         // Output string
 
     // Just return an empty string if the input is empty
-    if (input.size() == 0) return {};
+    if (input.empty()) return {};
 
     // Estimate the size of the output to avoid repetitive buffer resizing
     output.reserve(input.size() * 2);
@@ -190,7 +195,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
     std::uint_fast32_t group_size = 0;          // How many bits in group
 
     // Just return an empty string if the input is empty
-    if (input.size() == 0) return {};
+    if (input.empty()) return {};
 
     // Estimate the size of the output to avoid repetitive buffer resizing
     output.reserve(input.size() / 2);

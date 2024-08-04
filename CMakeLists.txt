@@ -18,6 +18,9 @@ endif()
 # Option to control ability to install the library
 option(bases_INSTALL "Install the Base-N Library" ON)
 
+# Determine whether clang-tidy should be used during build
+option(bases_CLANG_TIDY "Use clang-tidy to perform linting during build" OFF)
+
 add_subdirectory(dependencies)
 add_subdirectory(src)
 

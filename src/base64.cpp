@@ -166,10 +166,11 @@ std::string Encode(const std::span<const std::uint8_t> input)
     std::size_t group_size = 0;                 // How many bits in group
 
     // Just return an empty string if the input is empty
-    if (input.size() == 0) return {};
+    if (input.empty()) return {};
 
     // Estimate the size of the output to avoid repetitive buffer resizing
-    output.reserve((((4 * input.size()) / 3) + 3) & ~std::size_t(3));
+    output.reserve((((4 * input.size()) / 3) + 3) &
+                   ~static_cast<std::size_t>(3));
 
     // Iterate over the input string to form 24-bit groups
     for (const std::uint8_t octet : input)
@@ -256,7 +257,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
     std::uint_fast32_t group_size = 0;          // How many bits in group
 
     // Just return an empty string if the input is empty
-    if (input.size() == 0) return {};
+    if (input.empty()) return {};
 
     // Estimate the size of the output to avoid repetitive buffer resizing
     output.reserve(((3 * input.size()) / 4) + 1);

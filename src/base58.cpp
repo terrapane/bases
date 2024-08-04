@@ -194,7 +194,8 @@ std::string Encode(const std::span<const std::uint8_t> input)
                 output_length++;
             }
             carry += static_cast<std::uint8_t>(output[j - zeros]) << 8;
-            output[j - zeros] = static_cast<std::uint8_t>(carry % 58);
+            output[j - zeros] =
+                static_cast<char>(static_cast<std::uint8_t>(carry % 58));
             carry /= 58;
         }
 
@@ -268,7 +269,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
         }
 
         // Skip over whitespace
-        if (std::isspace(input[i]))
+        if (std::isspace(input[i]) != 0)
         {
             digits_start++;
             continue;
@@ -285,7 +286,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
     for (std::size_t i = digits_start; i < input_length; i++)
     {
         // Skip over whitespace
-        if (std::isspace(input[i])) continue;
+        if (std::isspace(input[i]) != 0) continue;
 
         // Translate the character to the Base58 integer value
         std::uint32_t carry =

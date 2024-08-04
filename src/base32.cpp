@@ -164,7 +164,7 @@ std::string Encode(const std::span<const std::uint8_t> input)
     std::size_t quantum = 0;                    // 5-bit groups outputted
 
     // Just return an empty string if the input is empty
-    if (input.size() == 0) return {};
+    if (input.empty()) return {};
 
     // Estimate the size of the output to avoid repetitive buffer resizing
     output.reserve(((input.size() / 5) + ((input.size() % 5 > 0) ? 1 : 0)) * 8);
@@ -181,7 +181,7 @@ std::string Encode(const std::span<const std::uint8_t> input)
         // Increment the group size to represents the number of data bits
         group_size += 8;
 
-        do
+        while (group_size >= 5)
         {
             // Convert the top most significant 5 bits using the Base32Table,
             // appending the Base32 character to the string
@@ -193,7 +193,7 @@ std::string Encode(const std::span<const std::uint8_t> input)
             // Reduce the group size to be 5 bits less
             group_size -= 5;
 
-        } while (group_size >= 5);
+        }
 
         // Reset quantum if all 40 bits of the current group were written
         if (quantum == 8) quantum = 0;
@@ -251,10 +251,11 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
     std::uint_fast32_t group_size = 0;          // How many bits in group
 
     // Just return an empty string if the input is empty
-    if (input.size() == 0) return {};
+    if (input.empty()) return {};
 
     // Estimate the size of the output to avoid repetitive buffer resizing
-    output.reserve(input.size() / 1.6);
+    output.reserve(
+        static_cast<std::size_t>(static_cast<double>(input.size()) / 1.6));
 
     // Iterate over the input string
     for (const char c : input)
