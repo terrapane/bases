@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 # Define the Base-N Library project
 project(bases
-        VERSION 1.0.1.0
+        VERSION 1.0.2.0
         DESCRIPTION "Base-N Encoder/Decoder Library"
         LANGUAGES CXX)
 
@@ -21,10 +21,11 @@ option(bases_INSTALL "Install the Base-N Library" ON)
 # Determine whether clang-tidy should be used during build
 option(bases_CLANG_TIDY "Use clang-tidy to perform linting during build" OFF)
 
+# Ensure testing is enabled to surface tests in dependencies
+include(CTest)
+
 add_subdirectory(dependencies)
 add_subdirectory(src)
-
-include(CTest)
 
 if(BUILD_TESTING AND bases_BUILD_TESTS)
     add_subdirectory(test)
