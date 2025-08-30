@@ -237,7 +237,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
     std::uint_fast32_t group = 0;               // Group of 24 bits
     std::uint_fast32_t group_size = 0;          // How many octets in group
 
-    // Just return an empty string if the input is empty
+    // Just return an empty octet vector if the input is empty
     if (input.empty()) return {};
 
     // Reserve space for output (= input size / 1.5)
@@ -270,7 +270,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
                                             ((group >>  8) & 0xff) * 45 +
                                             ((group      ) & 0xff) * 2025;
 
-            // Append the octets to the output string
+            // Append the octets to the output vector
             output.push_back((octet_pair >> 8) & 0xff);
             output.push_back((octet_pair     ) & 0xff);
 
@@ -283,8 +283,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
     // Do we have a partial group to consider?
     if (group_size > 0)
     {
-        // Anything other than exactly two octets would indicate a
-        // string length error
+        // Anything other than two octets would indicate a string length error
         if (group_size != 2) return {};
 
         // Compute the octet value to convert

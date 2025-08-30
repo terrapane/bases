@@ -256,13 +256,13 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
     std::uint_fast32_t group = 0;               // Group of 24 bits
     std::uint_fast32_t group_size = 0;          // How many bits in group
 
-    // Just return an empty string if the input is empty
+    // Just return an empty octet vector if the input is empty
     if (input.empty()) return {};
 
     // Estimate the size of the output to avoid repetitive buffer resizing
     output.reserve(((3 * input.size()) / 4) + 1);
 
-    // Iterate over the input span
+    // Iterate over the input string
     for (const char c : input)
     {
         // Terminate the loop if we find a padding character
@@ -286,7 +286,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
         // Check if the group is full
         if (group_size == 24)
         {
-            // Append the octets to the output string
+            // Append the octets to the output vector
             output.push_back((group >> 16) & 0xff);
             output.push_back((group >>  8) & 0xff);
             output.push_back((group      ) & 0xff);
@@ -303,7 +303,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
         // Shift all bits in the group left, padding the group with zeros
         group <<= (24 - group_size);
 
-        // Append the octets to the output string
+        // Append the octets to the output vector
         output.push_back((group >> 16) & 0xff);
         if (group_size >= 16)
         {

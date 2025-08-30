@@ -194,7 +194,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
     std::uint_fast32_t group = 0;               // Current bit group
     std::uint_fast32_t group_size = 0;          // How many bits in group
 
-    // Just return an empty string if the input is empty
+    // Just return an empty octet vector if the input is empty
     if (input.empty()) return {};
 
     // Estimate the size of the output to avoid repetitive buffer resizing
@@ -221,7 +221,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
         // Do we have a full octet?
         if (group_size == 8)
         {
-            // Append the octet to the output string
+            // Append the octet to the output vector
             output.push_back(group & 0xff);
 
             // Reset group data

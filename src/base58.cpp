@@ -241,7 +241,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
     // Get the initial input length
     std::size_t input_length = input.length();
 
-    // If the input length is 0, return an empty string
+    // If the input length is 0, return an empty octet vector
     if (input_length == 0) return {};
 
     // Per the implementation in the Bitcoin Core code, the typical length is
@@ -295,7 +295,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
         // If it is not a valid character, return an empty string
         if (carry == InvalidBase58Character) return {};
 
-        // Iterate over the output string to incrementally convert bases
+        // Iterate over the output vector to incrementally convert bases
         for (std::size_t j = 0; j < max_output_length; j++)
         {
             // At the end of the output buffer?
