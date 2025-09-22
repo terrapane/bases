@@ -129,7 +129,10 @@ STF_TEST(Base64, RandomTest)
     std::uniform_int_distribution<unsigned> random_octet(0, 255);
 
     // Create a long random vector of octets
-    for(int i = 0; i < 50000; i++) original.push_back(random_octet(generator));
+    for (int i = 0; i < 50000; i++)
+    {
+        original.push_back(static_cast<uint8_t>(random_octet(generator)));
+    }
 
     // Encode the vector
     encoded = Base64::Encode(original);

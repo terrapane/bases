@@ -116,7 +116,10 @@ STF_TEST(Base32, RandomTest)
     std::uniform_int_distribution<unsigned> random_octet(0, 255);
 
     // Create a long random string of octets
-    for (int i = 0; i < 50000; i++) original.push_back(random_octet(generator));
+    for (int i = 0; i < 50000; i++)
+    {
+        original.push_back(static_cast<uint8_t>(random_octet(generator)));
+    }
 
     // Encode the string
     encoded = Base32::Encode(original);

@@ -56,9 +56,9 @@ STF_TEST(Base16, EncodeTests)
                          "54686520717569636B2062726F776E20666F78206A756D7073206"
                          "F76657220746865206C617A7920646F67");
     std::string str;
-    str += char(255);
+    str += static_cast<char>(255);
     VERIFY_BASE16_ENCODE(str, "FF");
-    str += char(128);
+    str += static_cast<char>(128);
     VERIFY_BASE16_ENCODE(str, "FF80");
 }
 
@@ -133,7 +133,10 @@ STF_TEST(Base16, RandomTest)
     std::uniform_int_distribution<unsigned> random_octet(0, 255);
 
     // Create a long random string of octets
-    for (int i = 0; i < 50000; i++) original.push_back(random_octet(generator));
+    for (int i = 0; i < 50000; i++)
+    {
+        original.push_back(static_cast<uint8_t>(random_octet(generator)));
+    }
 
     // Encode the string
     encoded = Base16::Encode(original);
