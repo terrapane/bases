@@ -1,3 +1,6 @@
+# Include standard installation directory variables
+include(GNUInstallDirs)
+
 # Create the encoder/decoder library
 add_library(bases STATIC base16.cpp base32.cpp base45.cpp base58.cpp base64.cpp)
 add_library(Terra::bases ALIAS bases)
@@ -7,7 +10,8 @@ target_include_directories(bases
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 # Specify the C++ standard to observe
 set_target_properties(bases
@@ -29,12 +33,11 @@ endif()
 # Use the following compile options
 target_compile_options(bases
     PRIVATE
-        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>: -Wpedantic -Wextra -Wall>
-        $<$<CXX_COMPILER_ID:MSVC>: >)
+        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wpedantic -Wextra -Wall>
+        $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>)
 
 # Install target and associated include files
 if(bases_INSTALL)
-    include(GNUInstallDirs)
     install(TARGETS bases EXPORT basesTargets ARCHIVE)
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ TYPE INCLUDE)
     install(EXPORT basesTargets

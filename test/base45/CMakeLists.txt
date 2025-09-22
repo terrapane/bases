@@ -1,4 +1,4 @@
-# Create the test excutable
+# Create the test executable
 add_executable(test_base45 test_base45.cpp)
 
 # Link to the required libraries
@@ -14,8 +14,8 @@ set_target_properties(test_base45
 # Specify the compiler options
 target_compile_options(test_base45
     PRIVATE
-        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>: -Wpedantic -Wextra -Wall>
-        $<$<CXX_COMPILER_ID:MSVC>: >)
+        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wpedantic -Wextra -Wall>
+        $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>)
 
 # Ensure CTest can find the test
 add_test(NAME test_base45
