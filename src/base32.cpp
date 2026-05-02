@@ -1,7 +1,7 @@
 /*
  *  base32.cpp
  *
- *  Copyright (C) 2024
+ *  Copyright (C) 2024, 2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -19,13 +19,18 @@
 #include <cstdint>
 #include <limits>
 #include <climits>
+#include <array>
+#include <span>
 #include <terra/bases/base32.h>
 
 namespace Terra::Base32
 {
 
+namespace
+{
+
 // Define the table used for converting to Base32
-static const char Base32Table[32] =
+const std::array<char, 32> Base32Table =
 {
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
@@ -33,32 +38,40 @@ static const char Base32Table[32] =
 };
 
 // Define the padding octet
-static constexpr char Base32PaddingCharacter = '=';
+constexpr char Base32PaddingCharacter = '=';
 
 // Define an value to represent an invalid Base32 character
-static constexpr std::uint8_t InvalidBase32Character = 255;
+constexpr std::uint8_t InvalidBase32Character = 255;
 
-// Use the C pre-processor to define a macro that will tell us the integer
-// value for any given Base32 character
-#define B32ToInt(x) ( \
-    (x) == 'A' ?  0 : (x) == 'B' ?  1 : (x) == 'C' ?  2 : (x) == 'D' ?  3 : \
-    (x) == 'E' ?  4 : (x) == 'F' ?  5 : (x) == 'G' ?  6 : (x) == 'H' ?  7 : \
-    (x) == 'I' ?  8 : (x) == 'J' ?  9 : (x) == 'K' ? 10 : (x) == 'L' ? 11 : \
-    (x) == 'M' ? 12 : (x) == 'N' ? 13 : (x) == 'O' ? 14 : (x) == 'P' ? 15 : \
-    (x) == 'Q' ? 16 : (x) == 'R' ? 17 : (x) == 'S' ? 18 : (x) == 'T' ? 19 : \
-    (x) == 'U' ? 20 : (x) == 'V' ? 21 : (x) == 'W' ? 22 : (x) == 'X' ? 23 : \
-    (x) == 'Y' ? 24 : (x) == 'Z' ? 25 : (x) == 'a' ?  0 : (x) == 'b' ?  1 : \
-    (x) == 'c' ?  2 : (x) == 'd' ?  3 : (x) == 'e' ?  4 : (x) == 'f' ?  5 : \
-    (x) == 'g' ?  6 : (x) == 'h' ?  7 : (x) == 'i' ?  8 : (x) == 'j' ?  9 : \
-    (x) == 'k' ? 10 : (x) == 'l' ? 11 : (x) == 'm' ? 12 : (x) == 'n' ? 13 : \
-    (x) == 'o' ? 14 : (x) == 'p' ? 15 : (x) == 'q' ? 16 : (x) == 'r' ? 17 : \
-    (x) == 's' ? 18 : (x) == 't' ? 19 : (x) == 'u' ? 20 : (x) == 'v' ? 21 : \
-    (x) == 'w' ? 22 : (x) == 'x' ? 23 : (x) == 'y' ? 24 : (x) == 'z' ? 25 : \
-    (x) == '2' ? 26 : (x) == '3' ? 27 : (x) == '4' ? 28 : (x) == '5' ? 29 : \
-    (x) == '6' ? 30 : (x) == '7' ? 31 : InvalidBase32Character)
+// Function that will tell us the integer value for any given Base32 character
+constexpr std::uint8_t B32ToInt(std::uint8_t x) noexcept
+{
+    // NOLINTBEGIN(readability-avoid-nested-conditional-operator)
+    return (x) == 'A' ?  0 : (x) == 'B' ?  1 : (x) == 'C' ?  2 :
+           (x) == 'D' ?  3 : (x) == 'E' ?  4 : (x) == 'F' ?  5 :
+           (x) == 'G' ?  6 : (x) == 'H' ?  7 : (x) == 'I' ?  8 :
+           (x) == 'J' ?  9 : (x) == 'K' ? 10 : (x) == 'L' ? 11 :
+           (x) == 'M' ? 12 : (x) == 'N' ? 13 : (x) == 'O' ? 14 :
+           (x) == 'P' ? 15 : (x) == 'Q' ? 16 : (x) == 'R' ? 17 :
+           (x) == 'S' ? 18 : (x) == 'T' ? 19 : (x) == 'U' ? 20 :
+           (x) == 'V' ? 21 : (x) == 'W' ? 22 : (x) == 'X' ? 23 :
+           (x) == 'Y' ? 24 : (x) == 'Z' ? 25 : (x) == 'a' ?  0 :
+           (x) == 'b' ?  1 : (x) == 'c' ?  2 : (x) == 'd' ?  3 :
+           (x) == 'e' ?  4 : (x) == 'f' ?  5 : (x) == 'g' ?  6 :
+           (x) == 'h' ?  7 : (x) == 'i' ?  8 : (x) == 'j' ?  9 :
+           (x) == 'k' ? 10 : (x) == 'l' ? 11 : (x) == 'm' ? 12 :
+           (x) == 'n' ? 13 : (x) == 'o' ? 14 : (x) == 'p' ? 15 :
+           (x) == 'q' ? 16 : (x) == 'r' ? 17 : (x) == 's' ? 18 :
+           (x) == 't' ? 19 : (x) == 'u' ? 20 : (x) == 'v' ? 21 :
+           (x) == 'w' ? 22 : (x) == 'x' ? 23 : (x) == 'y' ? 24 :
+           (x) == 'z' ? 25 : (x) == '2' ? 26 : (x) == '3' ? 27 :
+           (x) == '4' ? 28 : (x) == '5' ? 29 : (x) == '6' ? 30 :
+           (x) == '7' ? 31 : InvalidBase32Character;
+    // NOLINTEND(readability-avoid-nested-conditional-operator)
+}
 
 // Define the table for converting from Base32 characters to integer values
-static const std::uint8_t Base32ReverseTable[256] =
+const std::array<std::uint8_t, 256> Base32ReverseTable =
 {
     B32ToInt(0),   B32ToInt(1),   B32ToInt(2),   B32ToInt(3),   B32ToInt(4),
     B32ToInt(5),   B32ToInt(6),   B32ToInt(7),   B32ToInt(8),   B32ToInt(9),
@@ -113,6 +126,8 @@ static const std::uint8_t Base32ReverseTable[256] =
     B32ToInt(250), B32ToInt(251), B32ToInt(252), B32ToInt(253), B32ToInt(254),
     B32ToInt(255)
 };
+
+} // namespace
 
 /*
  *  Encode
@@ -185,7 +200,8 @@ std::string Encode(const std::span<const std::uint8_t> input)
         {
             // Convert the top most significant 5 bits using the Base32Table,
             // appending the Base32 character to the string
-            output += Base32Table[(group >> (group_size - 5)) & 0x1f];
+            output +=
+                std::span(Base32Table)[(group >> (group_size - 5)) & 0x1f];
 
             // Note that 5 bits were outputted
             quantum++;
@@ -207,7 +223,7 @@ std::string Encode(const std::span<const std::uint8_t> input)
 
         // Convert the residual 5 bits using the Base32Table, appending the
         // Base32 character to the string
-        output += Base32Table[group & 0x1f];
+        output += std::span(Base32Table)[group & 0x1f];
 
         // Note that 5 bits were outputted
         quantum++;
@@ -264,7 +280,8 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
         if (c == Base32PaddingCharacter) break;
 
         // Determine if we have a valid Base32 character
-        std::uint8_t octet = Base32ReverseTable[static_cast<std::uint8_t>(c)];
+        std::uint8_t octet =
+            std::span(Base32ReverseTable)[static_cast<std::uint8_t>(c)];
 
         // Skip over any invalid character in the input
         if (octet == InvalidBase32Character) continue;

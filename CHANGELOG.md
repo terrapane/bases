@@ -1,5 +1,10 @@
 # Change Log
 
+v1.0.4
+
+- Removed legacy C macros
+- Use std::span for bounds checking under debug builds
+
 v1.0.3
 
 - Addressed compiler warnings on Windows

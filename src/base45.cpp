@@ -1,7 +1,7 @@
 /*
  *  base45.cpp
  *
- *  Copyright (C) 2024
+ *  Copyright (C) 2024, 2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -18,13 +18,18 @@
 
 #include <cstdint>
 #include <climits>
+#include <array>
+#include <span>
 #include <terra/bases/base45.h>
 
 namespace Terra::Base45
 {
 
+namespace
+{
+
 // Define the table used for converting to Base45
-static const char Base45Table[45] =
+const std::array<char, 45> Base45Table =
 {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C',
     'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
@@ -33,26 +38,33 @@ static const char Base45Table[45] =
 };
 
 // Define an value to represent an invalid Base45 character
-static constexpr std::uint8_t InvalidBase45Character = 255;
+constexpr std::uint8_t InvalidBase45Character = 255;
 
-// Use the C pre-processor to define a macro that will tell us the integer
-// value for any given Base45 character
-#define B45ToInt(x) ( \
-    (x) == '0' ?  0 : (x) == '1' ?  1 : (x) == '2' ?  2 : (x) == '3' ?  3 : \
-    (x) == '4' ?  4 : (x) == '5' ?  5 : (x) == '6' ?  6 : (x) == '7' ?  7 : \
-    (x) == '8' ?  8 : (x) == '9' ?  9 : (x) == 'A' ? 10 : (x) == 'B' ? 11 : \
-    (x) == 'C' ? 12 : (x) == 'D' ? 13 : (x) == 'E' ? 14 : (x) == 'F' ? 15 : \
-    (x) == 'G' ? 16 : (x) == 'H' ? 17 : (x) == 'I' ? 18 : (x) == 'J' ? 19 : \
-    (x) == 'K' ? 20 : (x) == 'L' ? 21 : (x) == 'M' ? 22 : (x) == 'N' ? 23 : \
-    (x) == 'O' ? 24 : (x) == 'P' ? 25 : (x) == 'Q' ? 26 : (x) == 'R' ? 27 : \
-    (x) == 'S' ? 28 : (x) == 'T' ? 29 : (x) == 'U' ? 30 : (x) == 'V' ? 31 : \
-    (x) == 'W' ? 32 : (x) == 'X' ? 33 : (x) == 'Y' ? 34 : (x) == 'Z' ? 35 : \
-    (x) == ' ' ? 36 : (x) == '$' ? 37 : (x) == '%' ? 38 : (x) == '*' ? 39 : \
-    (x) == '+' ? 40 : (x) == '-' ? 41 : (x) == '.' ? 42 : (x) == '/' ? 43 : \
-    (x) == ':' ? 44 : InvalidBase45Character)
+// Function that will tell us the integer value for any given Base45 character
+constexpr std::uint8_t B45ToInt(std::uint8_t x) noexcept
+{
+    // NOLINTBEGIN(readability-avoid-nested-conditional-operator)
+    return (x) == '0' ?  0 : (x) == '1' ?  1 : (x) == '2' ?  2 :
+           (x) == '3' ?  3 : (x) == '4' ?  4 : (x) == '5' ?  5 :
+           (x) == '6' ?  6 : (x) == '7' ?  7 : (x) == '8' ?  8 :
+           (x) == '9' ?  9 : (x) == 'A' ? 10 : (x) == 'B' ? 11 :
+           (x) == 'C' ? 12 : (x) == 'D' ? 13 : (x) == 'E' ? 14 :
+           (x) == 'F' ? 15 : (x) == 'G' ? 16 : (x) == 'H' ? 17 :
+           (x) == 'I' ? 18 : (x) == 'J' ? 19 : (x) == 'K' ? 20 :
+           (x) == 'L' ? 21 : (x) == 'M' ? 22 : (x) == 'N' ? 23 :
+           (x) == 'O' ? 24 : (x) == 'P' ? 25 : (x) == 'Q' ? 26 :
+           (x) == 'R' ? 27 : (x) == 'S' ? 28 : (x) == 'T' ? 29 :
+           (x) == 'U' ? 30 : (x) == 'V' ? 31 : (x) == 'W' ? 32 :
+           (x) == 'X' ? 33 : (x) == 'Y' ? 34 : (x) == 'Z' ? 35 :
+           (x) == ' ' ? 36 : (x) == '$' ? 37 : (x) == '%' ? 38 :
+           (x) == '*' ? 39 : (x) == '+' ? 40 : (x) == '-' ? 41 :
+           (x) == '.' ? 42 : (x) == '/' ? 43 : (x) == ':' ? 44 :
+           InvalidBase45Character;
+    // NOLINTEND(readability-avoid-nested-conditional-operator)
+}
 
 // Define the table for converting from Base45 characters to integer values
-static const std::uint8_t Base45ReverseTable[256] =
+const std::array<std::uint8_t, 256> Base45ReverseTable =
 {
     B45ToInt(0),   B45ToInt(1),   B45ToInt(2),   B45ToInt(3),   B45ToInt(4),
     B45ToInt(5),   B45ToInt(6),   B45ToInt(7),   B45ToInt(8),   B45ToInt(9),
@@ -108,6 +120,8 @@ static const std::uint8_t Base45ReverseTable[256] =
     B45ToInt(255)
 };
 
+} // namespace
+
 /*
  *  Encode
  *
@@ -156,6 +170,9 @@ std::string Encode(const std::span<const std::uint8_t> input)
     std::size_t group = 0;                      // Group of 16 bits
     std::size_t group_size = 0;                 // How many octets in group
 
+    // Define a span over the Base45Table
+    const auto table_span = std::span(Base45Table);
+
     // Just return an empty string if the input is empty
     if (input.empty()) return {};
 
@@ -188,9 +205,9 @@ std::string Encode(const std::span<const std::uint8_t> input)
         {
             // Convert one group at a time using the Base45Table, appending
             // Base45 characters to the string for each group
-            output += Base45Table[(group       ) % 45];
-            output += Base45Table[(group /   45) % 45];
-            output += Base45Table[(group / 2025) % 45];
+            output += table_span[(group       ) % 45];
+            output += table_span[(group /   45) % 45];
+            output += table_span[(group / 2025) % 45];
 
             // Reset group data
             group_size = 0;
@@ -203,8 +220,8 @@ std::string Encode(const std::span<const std::uint8_t> input)
     {
         // Convert the last group using the Base45Table, appending Base45
         // characters to the string
-        output += Base45Table[(group     ) % 45];
-        output += Base45Table[(group / 45) % 45];
+        output += table_span[(group     ) % 45];
+        output += table_span[(group / 45) % 45];
     }
 
     return output;
@@ -248,7 +265,8 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
     for (const char c : input)
     {
         // Determine if we have a valid Base45 character
-        std::uint8_t octet = Base45ReverseTable[static_cast<std::uint8_t>(c)];
+        std::uint8_t octet =
+            std::span(Base45ReverseTable)[static_cast<std::uint8_t>(c)];
 
         // Skip over any invalid character in the input
         if (octet == InvalidBase45Character) continue;
@@ -266,9 +284,9 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
         if (group_size == 3)
         {
             // Compute the 16-bit value represented by this group
-            std::uint_fast16_t octet_pair = ((group >> 16) & 0xff) +
-                                            ((group >>  8) & 0xff) * 45 +
-                                            ((group      ) & 0xff) * 2025;
+            std::uint_fast16_t octet_pair = (( group >> 16) & 0xff) +
+                                            (((group >>  8) & 0xff) * 45) +
+                                            (((group      ) & 0xff) * 2025);
 
             // Append the octets to the output vector
             output.push_back((octet_pair >> 8) & 0xff);

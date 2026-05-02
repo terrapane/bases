@@ -1,7 +1,7 @@
 /*
  *  base16.cpp
  *
- *  Copyright (C) 2024
+ *  Copyright (C) 2024, 2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -18,6 +18,8 @@
 
 #include <cstdint>
 #include <climits>
+#include <array>
+#include <span>
 #include <terra/bases/base16.h>
 
 namespace Terra::Base16
@@ -27,7 +29,7 @@ namespace
 {
 
 // Define the table used for converting to Base16
-const char Base16Table[16] =
+const std::array<char, 16> Base16Table =
 {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C',
     'D', 'E', 'F'
@@ -36,18 +38,23 @@ const char Base16Table[16] =
 // Define an value to represent an invalid Base16 character
 constexpr std::uint8_t InvalidBase16Character = 255;
 
-// Use the C pre-processor to define a macro that will tell us the integer
-// value for any given Base16 character
-#define B16ToInt(x) ( \
-    (x) == '0' ?  0 : (x) == '1' ?  1 : (x) == '2' ?  2 : (x) == '3' ?  3 : \
-    (x) == '4' ?  4 : (x) == '5' ?  5 : (x) == '6' ?  6 : (x) == '7' ?  7 : \
-    (x) == '8' ?  8 : (x) == '9' ?  9 : (x) == 'A' ? 10 : (x) == 'B' ? 11 : \
-    (x) == 'C' ? 12 : (x) == 'D' ? 13 : (x) == 'E' ? 14 : (x) == 'F' ? 15 : \
-    (x) == 'a' ? 10 : (x) == 'b' ? 11 : (x) == 'c' ? 12 : (x) == 'd' ? 13 : \
-    (x) == 'e' ? 14 : (x) == 'f' ? 15 : InvalidBase16Character)
+// Function that will tell us the integer value for any given Base16 character
+constexpr uint8_t B16ToInt(std::uint8_t x) noexcept
+{
+    // NOLINTBEGIN(readability-avoid-nested-conditional-operator)
+    return (x) == '0' ?  0 : (x) == '1' ?  1 : (x) == '2' ?  2 :
+           (x) == '3' ?  3 : (x) == '4' ?  4 : (x) == '5' ?  5 :
+           (x) == '6' ?  6 : (x) == '7' ?  7 : (x) == '8' ?  8 :
+           (x) == '9' ?  9 : (x) == 'A' ? 10 : (x) == 'B' ? 11 :
+           (x) == 'C' ? 12 : (x) == 'D' ? 13 : (x) == 'E' ? 14 :
+           (x) == 'F' ? 15 : (x) == 'a' ? 10 : (x) == 'b' ? 11 :
+           (x) == 'c' ? 12 : (x) == 'd' ? 13 : (x) == 'e' ? 14 :
+           (x) == 'f' ? 15 : InvalidBase16Character;
+    // NOLINTEND(readability-avoid-nested-conditional-operator)
+}
 
 // Define the table for converting from Base16 characters to integer values
-const std::uint8_t Base16ReverseTable[256] =
+const std::array<std::uint8_t, 256> Base16ReverseTable =
 {
     B16ToInt(0),   B16ToInt(1),   B16ToInt(2),   B16ToInt(3),   B16ToInt(4),
     B16ToInt(5),   B16ToInt(6),   B16ToInt(7),   B16ToInt(8),   B16ToInt(9),
@@ -161,8 +168,8 @@ std::string Encode(const std::span<const std::uint8_t> input)
     for (const std::uint8_t octet : input)
     {
         // Write out the two hex characters representing this octet
-        output += Base16Table[(octet >> 4) & 0x0f];
-        output += Base16Table[(octet     ) & 0x0f];
+        output += std::span(Base16Table)[(octet >> 4) & 0x0f];
+        output += std::span(Base16Table)[(octet     ) & 0x0f];
     }
 
     return output;
@@ -204,7 +211,8 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
     for (const char c : input)
     {
         // Determine if we have a valid Base16 character
-        std::uint8_t octet = Base16ReverseTable[static_cast<std::uint8_t>(c)];
+        std::uint8_t octet =
+            std::span(Base16ReverseTable)[static_cast<std::uint8_t>(c)];
 
         // Skip over any invalid character in the input
         if (octet == InvalidBase16Character) continue;

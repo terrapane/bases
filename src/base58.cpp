@@ -1,7 +1,7 @@
 /*
  *  base58.cpp
  *
- *  Copyright (C) 2024
+ *  Copyright (C) 2024, 2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -18,14 +18,20 @@
 
 #include <cstdint>
 #include <algorithm>
+#include <ranges>
 #include <climits>
+#include <array>
+#include <span>
 #include <terra/bases/base58.h>
 
 namespace Terra::Base58
 {
 
+namespace
+{
+
 // Define the table used for converting to Base58
-static const char Base58Table[58] =
+const std::array<char, 58> Base58Table =
 {
     '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
     'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S',
@@ -35,29 +41,37 @@ static const char Base58Table[58] =
 };
 
 // Define an value to represent an invalid Base58 character
-static constexpr std::uint8_t InvalidBase58Character = 255;
+constexpr std::uint8_t InvalidBase58Character = 255;
 
-// Use the C pre-processor to define a macro that will tell us the integer
-// value for any given Base58 character
-#define B58ToInt(x) ( \
-    (x) == '1' ?  0 : (x) == '2' ?  1 : (x) == '3' ?  2 : (x) == '4' ?  3 : \
-    (x) == '5' ?  4 : (x) == '6' ?  5 : (x) == '7' ?  6 : (x) == '8' ?  7 : \
-    (x) == '9' ?  8 : (x) == 'A' ?  9 : (x) == 'B' ? 10 : (x) == 'C' ? 11 : \
-    (x) == 'D' ? 12 : (x) == 'E' ? 13 : (x) == 'F' ? 14 : (x) == 'G' ? 15 : \
-    (x) == 'H' ? 16 : (x) == 'J' ? 17 : (x) == 'K' ? 18 : (x) == 'L' ? 19 : \
-    (x) == 'M' ? 20 : (x) == 'N' ? 21 : (x) == 'P' ? 22 : (x) == 'Q' ? 23 : \
-    (x) == 'R' ? 24 : (x) == 'S' ? 25 : (x) == 'T' ? 26 : (x) == 'U' ? 27 : \
-    (x) == 'V' ? 28 : (x) == 'W' ? 29 : (x) == 'X' ? 30 : (x) == 'Y' ? 31 : \
-    (x) == 'Z' ? 32 : (x) == 'a' ? 33 : (x) == 'b' ? 34 : (x) == 'c' ? 35 : \
-    (x) == 'd' ? 36 : (x) == 'e' ? 37 : (x) == 'f' ? 38 : (x) == 'g' ? 39 : \
-    (x) == 'h' ? 40 : (x) == 'i' ? 41 : (x) == 'j' ? 42 : (x) == 'k' ? 43 : \
-    (x) == 'm' ? 44 : (x) == 'n' ? 45 : (x) == 'o' ? 46 : (x) == 'p' ? 47 : \
-    (x) == 'q' ? 48 : (x) == 'r' ? 49 : (x) == 's' ? 50 : (x) == 't' ? 51 : \
-    (x) == 'u' ? 52 : (x) == 'v' ? 53 : (x) == 'w' ? 54 : (x) == 'x' ? 55 : \
-    (x) == 'y' ? 56 : (x) == 'z' ? 57 : InvalidBase58Character)
+// Function that will tell us the integer value for any given Base58 character
+constexpr std::uint8_t B58ToInt(std::uint8_t x) noexcept
+{
+    // NOLINTBEGIN(readability-avoid-nested-conditional-operator)
+    return (x) == '1' ?  0 : (x) == '2' ?  1 : (x) == '3' ?  2 :
+           (x) == '4' ?  3 : (x) == '5' ?  4 : (x) == '6' ?  5 :
+           (x) == '7' ?  6 : (x) == '8' ?  7 : (x) == '9' ?  8 :
+           (x) == 'A' ?  9 : (x) == 'B' ? 10 : (x) == 'C' ? 11 :
+           (x) == 'D' ? 12 : (x) == 'E' ? 13 : (x) == 'F' ? 14 :
+           (x) == 'G' ? 15 : (x) == 'H' ? 16 : (x) == 'J' ? 17 :
+           (x) == 'K' ? 18 : (x) == 'L' ? 19 : (x) == 'M' ? 20 :
+           (x) == 'N' ? 21 : (x) == 'P' ? 22 : (x) == 'Q' ? 23 :
+           (x) == 'R' ? 24 : (x) == 'S' ? 25 : (x) == 'T' ? 26 :
+           (x) == 'U' ? 27 : (x) == 'V' ? 28 : (x) == 'W' ? 29 :
+           (x) == 'X' ? 30 : (x) == 'Y' ? 31 : (x) == 'Z' ? 32 :
+           (x) == 'a' ? 33 : (x) == 'b' ? 34 : (x) == 'c' ? 35 :
+           (x) == 'd' ? 36 : (x) == 'e' ? 37 : (x) == 'f' ? 38 :
+           (x) == 'g' ? 39 : (x) == 'h' ? 40 : (x) == 'i' ? 41 :
+           (x) == 'j' ? 42 : (x) == 'k' ? 43 : (x) == 'm' ? 44 :
+           (x) == 'n' ? 45 : (x) == 'o' ? 46 : (x) == 'p' ? 47 :
+           (x) == 'q' ? 48 : (x) == 'r' ? 49 : (x) == 's' ? 50 :
+           (x) == 't' ? 51 : (x) == 'u' ? 52 : (x) == 'v' ? 53 :
+           (x) == 'w' ? 54 : (x) == 'x' ? 55 : (x) == 'y' ? 56 :
+           (x) == 'z' ? 57 : InvalidBase58Character;
+    // NOLINTEND(readability-avoid-nested-conditional-operator)
+}
 
 // Define the table for converting from Base58 characters to integer values
-static const std::uint8_t Base58ReverseTable[256] =
+const std::array<std::uint8_t, 256> Base58ReverseTable =
 {
     B58ToInt(0),   B58ToInt(1),   B58ToInt(2),   B58ToInt(3),   B58ToInt(4),
     B58ToInt(5),   B58ToInt(6),   B58ToInt(7),   B58ToInt(8),   B58ToInt(9),
@@ -108,10 +122,12 @@ static const std::uint8_t Base58ReverseTable[256] =
     B58ToInt(230), B58ToInt(231), B58ToInt(232), B58ToInt(233), B58ToInt(234),
     B58ToInt(235), B58ToInt(236), B58ToInt(237), B58ToInt(238), B58ToInt(239),
     B58ToInt(240), B58ToInt(241), B58ToInt(242), B58ToInt(243), B58ToInt(244),
-    B58ToInt(258), B58ToInt(246), B58ToInt(247), B58ToInt(248), B58ToInt(249),
+    B58ToInt(245), B58ToInt(246), B58ToInt(247), B58ToInt(248), B58ToInt(249),
     B58ToInt(250), B58ToInt(251), B58ToInt(252), B58ToInt(253), B58ToInt(254),
     B58ToInt(255)
 };
+
+} // namespace
 
 /*
  *  Encode
@@ -165,7 +181,7 @@ std::string Encode(const std::span<const std::uint8_t> input)
 
     // Per the implementation in the Bitcoin Core code, the expected length is
     // log(256) / log(58) octets larger than the input
-    std::size_t max_output_length = input_length * 137 / 100 + 1;
+    std::size_t max_output_length = (input_length * 137 / 100) + 1;
     std::string output(max_output_length, 0);
 
     // Initialize the count of leading zeros
@@ -209,11 +225,12 @@ std::string Encode(const std::span<const std::uint8_t> input)
     // Perform Base58 character substitution
     for (std::size_t i = 0; i <= output_length; i++)
     {
-        output[i] = Base58Table[static_cast<std::uint8_t>(output[i])];
+        output[i] =
+            std::span(Base58Table)[static_cast<std::uint8_t>(output[i])];
     }
 
     // Reverse the order of character string
-    std::reverse(std::begin(output), std::end(output));
+    std::ranges::reverse(output);
 
     return output;
 }
@@ -290,7 +307,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
 
         // Translate the character to the Base58 integer value
         std::uint32_t carry =
-            Base58ReverseTable[static_cast<std::uint8_t>(input[i])];
+            std::span(Base58ReverseTable)[static_cast<std::uint8_t>(input[i])];
 
         // If it is not a valid character, return an empty string
         if (carry == InvalidBase58Character) return {};
@@ -323,7 +340,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
     if (zeros > 0) output.resize(output.size() + zeros, 0);
 
     // Reverse the order of the binary output
-    std::reverse(std::begin(output), std::end(output));
+    std::ranges::reverse(output);
 
     return output;
 }

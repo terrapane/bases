@@ -1,7 +1,7 @@
 /*
  *  base64.cpp
  *
- *  Copyright (C) 2024
+ *  Copyright (C) 2024, 2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -18,13 +18,18 @@
 
 #include <cstdint>
 #include <climits>
+#include <array>
+#include <span>
 #include <terra/bases/base64.h>
 
 namespace Terra::Base64
 {
 
+namespace
+{
+
 // Define the table used for converting to Base64
-static const char Base64Table[64] =
+const std::array<char, 64> Base64Table =
 {
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
@@ -34,34 +39,42 @@ static const char Base64Table[64] =
 };
 
 // Define the padding octet
-static constexpr char Base64PaddingCharacter = '=';
+constexpr char Base64PaddingCharacter = '=';
 
 // Define an value to represent an invalid Base64 character
-static constexpr std::uint8_t InvalidBase64Character = 255;
+constexpr std::uint8_t InvalidBase64Character = 255;
 
-// Use the C pre-processor to define a macro that will tell us the integer
-// value for any given Base64 character
-#define B64ToInt(x) ( \
-    (x) == 'A' ?  0 : (x) == 'B' ?  1 : (x) == 'C' ?  2 : (x) == 'D' ?  3 : \
-    (x) == 'E' ?  4 : (x) == 'F' ?  5 : (x) == 'G' ?  6 : (x) == 'H' ?  7 : \
-    (x) == 'I' ?  8 : (x) == 'J' ?  9 : (x) == 'K' ? 10 : (x) == 'L' ? 11 : \
-    (x) == 'M' ? 12 : (x) == 'N' ? 13 : (x) == 'O' ? 14 : (x) == 'P' ? 15 : \
-    (x) == 'Q' ? 16 : (x) == 'R' ? 17 : (x) == 'S' ? 18 : (x) == 'T' ? 19 : \
-    (x) == 'U' ? 20 : (x) == 'V' ? 21 : (x) == 'W' ? 22 : (x) == 'X' ? 23 : \
-    (x) == 'Y' ? 24 : (x) == 'Z' ? 25 : (x) == 'a' ? 26 : (x) == 'b' ? 27 : \
-    (x) == 'c' ? 28 : (x) == 'd' ? 29 : (x) == 'e' ? 30 : (x) == 'f' ? 31 : \
-    (x) == 'g' ? 32 : (x) == 'h' ? 33 : (x) == 'i' ? 34 : (x) == 'j' ? 35 : \
-    (x) == 'k' ? 36 : (x) == 'l' ? 37 : (x) == 'm' ? 38 : (x) == 'n' ? 39 : \
-    (x) == 'o' ? 40 : (x) == 'p' ? 41 : (x) == 'q' ? 42 : (x) == 'r' ? 43 : \
-    (x) == 's' ? 44 : (x) == 't' ? 45 : (x) == 'u' ? 46 : (x) == 'v' ? 47 : \
-    (x) == 'w' ? 48 : (x) == 'x' ? 49 : (x) == 'y' ? 50 : (x) == 'z' ? 51 : \
-    (x) == '0' ? 52 : (x) == '1' ? 53 : (x) == '2' ? 54 : (x) == '3' ? 55 : \
-    (x) == '4' ? 56 : (x) == '5' ? 57 : (x) == '6' ? 58 : (x) == '7' ? 59 : \
-    (x) == '8' ? 60 : (x) == '9' ? 61 : (x) == '+' ? 62 : (x) == '/' ? 63 : \
-    InvalidBase64Character)
+// Function that will tell us the integer value for any given Base64 character
+constexpr std::uint8_t B64ToInt(std::uint8_t x) noexcept
+{
+    // NOLINTBEGIN(readability-avoid-nested-conditional-operator)
+    return (x) == 'A' ?  0 : (x) == 'B' ?  1 : (x) == 'C' ?  2 :
+           (x) == 'D' ?  3 : (x) == 'E' ?  4 : (x) == 'F' ?  5 :
+           (x) == 'G' ?  6 : (x) == 'H' ?  7 : (x) == 'I' ?  8 :
+           (x) == 'J' ?  9 : (x) == 'K' ? 10 : (x) == 'L' ? 11 :
+           (x) == 'M' ? 12 : (x) == 'N' ? 13 : (x) == 'O' ? 14 :
+           (x) == 'P' ? 15 : (x) == 'Q' ? 16 : (x) == 'R' ? 17 :
+           (x) == 'S' ? 18 : (x) == 'T' ? 19 : (x) == 'U' ? 20 :
+           (x) == 'V' ? 21 : (x) == 'W' ? 22 : (x) == 'X' ? 23 :
+           (x) == 'Y' ? 24 : (x) == 'Z' ? 25 : (x) == 'a' ? 26 :
+           (x) == 'b' ? 27 : (x) == 'c' ? 28 : (x) == 'd' ? 29 :
+           (x) == 'e' ? 30 : (x) == 'f' ? 31 : (x) == 'g' ? 32 :
+           (x) == 'h' ? 33 : (x) == 'i' ? 34 : (x) == 'j' ? 35 :
+           (x) == 'k' ? 36 : (x) == 'l' ? 37 : (x) == 'm' ? 38 :
+           (x) == 'n' ? 39 : (x) == 'o' ? 40 : (x) == 'p' ? 41 :
+           (x) == 'q' ? 42 : (x) == 'r' ? 43 : (x) == 's' ? 44 :
+           (x) == 't' ? 45 : (x) == 'u' ? 46 : (x) == 'v' ? 47 :
+           (x) == 'w' ? 48 : (x) == 'x' ? 49 : (x) == 'y' ? 50 :
+           (x) == 'z' ? 51 : (x) == '0' ? 52 : (x) == '1' ? 53 :
+           (x) == '2' ? 54 : (x) == '3' ? 55 : (x) == '4' ? 56 :
+           (x) == '5' ? 57 : (x) == '6' ? 58 : (x) == '7' ? 59 :
+           (x) == '8' ? 60 : (x) == '9' ? 61 : (x) == '+' ? 62 :
+           (x) == '/' ? 63 : InvalidBase64Character;
+    // NOLINTEND(readability-avoid-nested-conditional-operator)
+}
 
 // Define the table for converting from Base64 characters to integer values
-static const std::uint8_t Base64ReverseTable[256] =
+const std::array<std::uint8_t, 256> Base64ReverseTable =
 {
     B64ToInt(0),   B64ToInt(1),   B64ToInt(2),   B64ToInt(3),   B64ToInt(4),
     B64ToInt(5),   B64ToInt(6),   B64ToInt(7),   B64ToInt(8),   B64ToInt(9),
@@ -117,6 +130,8 @@ static const std::uint8_t Base64ReverseTable[256] =
     B64ToInt(255)
 };
 
+} // namespace
+
 /*
  *  Encode
  *
@@ -165,6 +180,9 @@ std::string Encode(const std::span<const std::uint8_t> input)
     std::size_t group = 0;                      // Group of 24 bits
     std::size_t group_size = 0;                 // How many bits in group
 
+    // Define a span over the Base64Table
+    const auto table_span = std::span(Base64Table);
+
     // Just return an empty string if the input is empty
     if (input.empty()) return {};
 
@@ -189,10 +207,10 @@ std::string Encode(const std::span<const std::uint8_t> input)
         {
             // Convert 6 bits at a time using the Base64Table, appending Base64
             // characters to the string for each of the 6 bits
-            output += Base64Table[(group >> 18) & 0x3f];
-            output += Base64Table[(group >> 12) & 0x3f];
-            output += Base64Table[(group >> 6 ) & 0x3f];
-            output += Base64Table[(group      ) & 0x3f];
+            output += table_span[(group >> 18) & 0x3f];
+            output += table_span[(group >> 12) & 0x3f];
+            output += table_span[(group >> 6 ) & 0x3f];
+            output += table_span[(group      ) & 0x3f];
 
             // Reset group data
             group_size = 0;
@@ -207,8 +225,8 @@ std::string Encode(const std::span<const std::uint8_t> input)
         group <<= (24 - group_size);
 
         // Convert 6 bits at a time using the Base64Table
-        output += Base64Table[(group >> 18) & 0x3f];
-        output += Base64Table[(group >> 12) & 0x3f];
+        output += table_span[(group >> 18) & 0x3f];
+        output += table_span[(group >> 12) & 0x3f];
         if (group_size == 8)
         {
             // We have only one residual octet, so we append two padding octets
@@ -219,7 +237,7 @@ std::string Encode(const std::span<const std::uint8_t> input)
         {
             // We have two residual octets, so we have an additional 6 bits
             // to output and then one padding octet
-            output += Base64Table[(group >> 6) & 0x3f];
+            output += table_span[(group >> 6) & 0x3f];
             output += Base64PaddingCharacter;
         }
     }
@@ -269,7 +287,8 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
         if (c == Base64PaddingCharacter) break;
 
         // Determine if we have a valid Base64 character
-        std::uint8_t octet = Base64ReverseTable[static_cast<std::uint8_t>(c)];
+        std::uint8_t octet =
+            std::span(Base64ReverseTable)[static_cast<std::uint8_t>(c)];
 
         // Skip over any invalid character in the input
         if (octet == InvalidBase64Character) continue;
