@@ -17,9 +17,13 @@
  */
 
 #include <cstdint>
+#include <cstddef>
 #include <climits>
 #include <array>
+#include <vector>
 #include <span>
+#include <string_view>
+#include <string>
 #include <terra/bases/base64.h>
 
 namespace Terra::Base64
@@ -148,7 +152,7 @@ const std::array<std::uint8_t, 256> Base64ReverseTable =
  *  Comments:
  *      None.
  */
-std::string Encode(const std::string_view input)
+std::string Encode(std::string_view input)
 {
     // This library assumes the width of char is 8 bits
     static_assert(CHAR_BIT == 8);
@@ -174,7 +178,7 @@ std::string Encode(const std::string_view input)
  *  Comments:
  *      None.
  */
-std::string Encode(const std::span<const std::uint8_t> input)
+std::string Encode(std::span<const std::uint8_t> input)
 {
     std::string output;                         // Output string
     std::size_t group = 0;                      // Group of 24 bits
@@ -268,7 +272,7 @@ std::string Encode(const std::span<const std::uint8_t> input)
  *      To allow for spacing, control characters, etc., any character that is
  *      not part of the character set is silently ignored.
  */
-std::vector<std::uint8_t> Decode(const std::string_view input)
+std::vector<std::uint8_t> Decode(std::string_view input)
 {
     std::vector<std::uint8_t> output;           // Output octets
     std::uint_fast32_t group = 0;               // Group of 24 bits

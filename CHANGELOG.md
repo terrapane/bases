@@ -4,6 +4,7 @@ v1.0.4
 
 - Removed legacy C macros
 - Use std::span for bounds checking under debug builds
+- Updated dependencies
 
 v1.0.3
 

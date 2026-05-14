@@ -43,7 +43,7 @@ namespace Terra::Base45
  *  Comments:
  *      None.
  */
-std::string Encode(const std::string_view input);
+std::string Encode(std::string_view input);
 
 /*
  *  Encode
@@ -61,25 +61,7 @@ std::string Encode(const std::string_view input);
  *  Comments:
  *      None.
  */
-std::string Encode(const std::string_view input);
-
-/*
- *  Encode
- *
- *  Description:
- *      This function will encode the given binary string into Base45.
- *
- *  Parameters:
- *      input [in]
- *          Binary string to be encoded as Base45.
- *
- *  Returns:
- *      The Base45-encoded text string.
- *
- *  Comments:
- *      None.
- */
-std::string Encode(const std::span<const std::uint8_t> input);
+std::string Encode(std::span<const std::uint8_t> input);
 
 /*
  *  Decode
@@ -102,6 +84,6 @@ std::string Encode(const std::span<const std::uint8_t> input);
  *      The alphabet is treated case sensitively as required by RFC 9285.
  *      Lowercase characters are ignored.
  */
-std::vector<std::uint8_t> Decode(const std::string_view input);
+std::vector<std::uint8_t> Decode(std::string_view input);
 
 } // namespace Terra::Base45

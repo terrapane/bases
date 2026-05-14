@@ -31,7 +31,7 @@ using namespace Terra;
 #define VERIFY_BASE64_ENCODE(input, expected) \
     { \
         auto output = Base64::Encode(input); \
-        STF_ASSERT_EQ(expected, output); \
+        STF_ASSERT_EQ(std::string(expected), output); \
     }
 
 #define VERIFY_BASE64_DECODE(input, expected) \
@@ -39,7 +39,7 @@ using namespace Terra;
         std::string s; \
         auto output = Base64::Decode(input); \
         std::copy(output.begin(), output.end(), std::back_inserter(s)); \
-        STF_ASSERT_EQ(s, expected); \
+        STF_ASSERT_EQ(std::string(expected), s); \
     }
 
 STF_TEST(Base64, EncodeTests)

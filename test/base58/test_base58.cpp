@@ -37,7 +37,7 @@ using namespace Terra;
         std::string s; \
         auto output = Base58::Decode(input); \
         std::copy(output.begin(), output.end(), std::back_inserter(s)); \
-        STF_ASSERT_EQ(s, expected); \
+        STF_ASSERT_EQ(std::string(expected), s); \
     }
 
 STF_TEST(Base58, EncodeTests)

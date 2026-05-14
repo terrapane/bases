@@ -43,7 +43,7 @@ namespace Terra::Base58
  *  Comments:
  *      None.
  */
-std::string Encode(const std::string_view input);
+std::string Encode(std::string_view input);
 
 /*
  *  Encode
@@ -61,7 +61,7 @@ std::string Encode(const std::string_view input);
  *  Comments:
  *      None.
  */
-std::string Encode(const std::span<const std::uint8_t> input);
+std::string Encode(std::span<const std::uint8_t> input);
 
 /*
  *  Decode
@@ -81,6 +81,6 @@ std::string Encode(const std::span<const std::uint8_t> input);
  *      To allow for whitespace and multi-line input, any whitespace character
  *      is silently ignored (including spaces, tabs, new lines, etc).
  */
-std::vector<std::uint8_t> Decode(const std::string_view input);
+std::vector<std::uint8_t> Decode(std::string_view input);
 
 } // namespace Terra::Base58

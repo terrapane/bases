@@ -17,10 +17,14 @@
  */
 
 #include <cstdint>
+#include <cstddef>
 #include <limits>
 #include <climits>
 #include <array>
+#include <vector>
 #include <span>
+#include <string>
+#include <string_view>
 #include <terra/bases/base32.h>
 
 namespace Terra::Base32
@@ -145,7 +149,7 @@ const std::array<std::uint8_t, 256> Base32ReverseTable =
  *  Comments:
  *      None.
  */
-std::string Encode(const std::string_view input)
+std::string Encode(std::string_view input)
 {
     // This library assumes the width of char is 8 bits
     static_assert(CHAR_BIT == 8);
@@ -171,7 +175,7 @@ std::string Encode(const std::string_view input)
  *  Comments:
  *      None.
  */
-std::string Encode(const std::span<const std::uint8_t> input)
+std::string Encode(std::span<const std::uint8_t> input)
 {
     std::string output;                         // Output string
     std::size_t group = 0;                      // Current bit group
@@ -260,7 +264,7 @@ std::string Encode(const std::span<const std::uint8_t> input)
  *
  *      For decoding purposes, the alphabet is treated case insensitively.
  */
-std::vector<std::uint8_t> Decode(const std::string_view input)
+std::vector<std::uint8_t> Decode(std::string_view input)
 {
     std::vector<std::uint8_t> output;           // Output string
     std::uint_fast32_t group = 0;               // Current bit group

@@ -43,7 +43,7 @@ namespace Terra::Base16
  *  Comments:
  *      None.
  */
-std::string Encode(const std::string_view input);
+std::string Encode(std::string_view input);
 
 /*
  *  Encode
@@ -61,7 +61,7 @@ std::string Encode(const std::string_view input);
  *  Comments:
  *      None.
  */
-std::string Encode(const std::span<const std::uint8_t> input);
+std::string Encode(std::span<const std::uint8_t> input);
 
 /*
  *  Decode
@@ -83,6 +83,6 @@ std::string Encode(const std::span<const std::uint8_t> input);
  *
  *      For decoding purposes, the alphabet is treated case insensitively.
  */
-std::vector<std::uint8_t> Decode(const std::string_view input);
+std::vector<std::uint8_t> Decode(std::string_view input);
 
 } // namespace Terra::Base16

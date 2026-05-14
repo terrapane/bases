@@ -17,11 +17,16 @@
  */
 
 #include <cstdint>
+#include <cstddef>
 #include <algorithm>
-#include <ranges>
 #include <climits>
+#include <cctype>
 #include <array>
+#include <vector>
 #include <span>
+#include <string_view>
+#include <string>
+
 #include <terra/bases/base58.h>
 
 namespace Terra::Base58
@@ -145,7 +150,7 @@ const std::array<std::uint8_t, 256> Base58ReverseTable =
  *  Comments:
  *      None.
  */
-std::string Encode(const std::string_view input)
+std::string Encode(std::string_view input)
 {
     // This library assumes the width of char is 8 bits
     static_assert(CHAR_BIT == 8);
@@ -171,17 +176,17 @@ std::string Encode(const std::string_view input)
  *  Comments:
  *      None.
  */
-std::string Encode(const std::span<const std::uint8_t> input)
+std::string Encode(std::span<const std::uint8_t> input)
 {
     // Get the initial input length
-    std::size_t input_length = input.size();
+    const std::size_t input_length = input.size();
 
     // If the input length is 0, return an empty string
     if (input_length == 0) return {};
 
     // Per the implementation in the Bitcoin Core code, the expected length is
     // log(256) / log(58) octets larger than the input
-    std::size_t max_output_length = (input_length * 137 / 100) + 1;
+    const std::size_t max_output_length = (input_length * 137 / 100) + 1;
     std::string output(max_output_length, 0);
 
     // Initialize the count of leading zeros
@@ -253,10 +258,10 @@ std::string Encode(const std::span<const std::uint8_t> input)
  *      To allow for whitespace and multi-line input, any whitespace character
  *      is silently ignored (including spaces, tabs, new lines, etc).
  */
-std::vector<std::uint8_t> Decode(const std::string_view input)
+std::vector<std::uint8_t> Decode(std::string_view input)
 {
     // Get the initial input length
-    std::size_t input_length = input.length();
+    const std::size_t input_length = input.length();
 
     // If the input length is 0, return an empty octet vector
     if (input_length == 0) return {};
@@ -265,7 +270,7 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
     // (log(58) / log(256)) times the input length; the worst case is that
     // the decoded length is the same (e.g., all 1s decode as a string of 0x00
     // values having the same octet length)
-    std::size_t max_output_length = input_length;
+    const std::size_t max_output_length = input_length;
     std::vector<std::uint8_t> output(max_output_length, 0);
 
     // Initialize the count of leading zeros

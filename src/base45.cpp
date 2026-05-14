@@ -17,9 +17,13 @@
  */
 
 #include <cstdint>
+#include <cstddef>
 #include <climits>
 #include <array>
+#include <vector>
 #include <span>
+#include <string_view>
+#include <string>
 #include <terra/bases/base45.h>
 
 namespace Terra::Base45
@@ -138,7 +142,7 @@ const std::array<std::uint8_t, 256> Base45ReverseTable =
  *  Comments:
  *      None.
  */
-std::string Encode(const std::string_view input)
+std::string Encode(std::string_view input)
 {
     // This library assumes the width of char is 8 bits
     static_assert(CHAR_BIT == 8);
@@ -164,7 +168,7 @@ std::string Encode(const std::string_view input)
  *  Comments:
  *      None.
  */
-std::string Encode(const std::span<const std::uint8_t> input)
+std::string Encode(std::span<const std::uint8_t> input)
 {
     std::string output;                         // Output string
     std::size_t group = 0;                      // Group of 16 bits
@@ -248,7 +252,7 @@ std::string Encode(const std::span<const std::uint8_t> input)
  *      The alphabet is treated case sensitively as required by RFC 9285.
  *      Lowercase characters are ignored.
  */
-std::vector<std::uint8_t> Decode(const std::string_view input)
+std::vector<std::uint8_t> Decode(std::string_view input)
 {
     std::vector<std::uint8_t> output;           // Output string
     std::uint_fast32_t group = 0;               // Group of 24 bits
@@ -284,9 +288,10 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
         if (group_size == 3)
         {
             // Compute the 16-bit value represented by this group
-            std::uint_fast16_t octet_pair = (( group >> 16) & 0xff) +
-                                            (((group >>  8) & 0xff) * 45) +
-                                            (((group      ) & 0xff) * 2025);
+            std::uint_fast16_t octet_pair =
+                ((((group >> 16) & 0xff)       ) +
+                 (((group >>  8) & 0xff) *   45) +
+                 (((group      ) & 0xff) * 2025)) & 0xffff;
 
             // Append the octets to the output vector
             output.push_back((octet_pair >> 8) & 0xff);
@@ -304,9 +309,8 @@ std::vector<std::uint8_t> Decode(const std::string_view input)
         // Anything other than two octets would indicate a string length error
         if (group_size != 2) return {};
 
-        // Compute the octet value to convert
-        output.push_back((((group >> 8) & 0xff) +
-                          ((group     ) & 0xff) * 45) & 0xff);
+        output.push_back(  ((group >> 8) & 0xff) +
+                         ((((group     ) & 0xff) * 45) & 0xff));
     }
 
     return output;
