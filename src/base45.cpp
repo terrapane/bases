@@ -181,22 +181,22 @@ std::string Encode(std::span<const std::uint8_t> input)
     if (input.empty()) return {};
 
     // Reserve space for output
-    if ((input.size() & 1) == 0)
+    if ((input.size() & 1U) == 0)
     {
         // Even size = input size + (input size / 2)
-        output.reserve(input.size() + (input.size() >> 1));
+        output.reserve(input.size() + (input.size() >> 1U));
     }
     else
     {
         // Even size = input size + (input size / 2) + 1
-        output.reserve(input.size() + (input.size() >> 1) + 1);
+        output.reserve(input.size() + (input.size() >> 1U) + 1);
     }
 
     // Iterate over the input string to form 16-bit groups
     for (const uint8_t octet : input)
     {
         // Shift the group 8 bits (no effect if group == 0)
-        group <<= 8;
+        group <<= 8U;
 
         // Add this octet to the group
         group |= static_cast<std::uint8_t>(octet);
@@ -276,7 +276,7 @@ std::vector<std::uint8_t> Decode(std::string_view input)
         if (octet == InvalidBase45Character) continue;
 
         // Shift the group 8 bits (no effect if group == 0)
-        group <<= 8;
+        group <<= 8U;
 
         // Add this octet to the group
         group |= octet;
@@ -289,13 +289,13 @@ std::vector<std::uint8_t> Decode(std::string_view input)
         {
             // Compute the 16-bit value represented by this group
             std::uint_fast16_t octet_pair =
-                ((((group >> 16) & 0xff)       ) +
-                 (((group >>  8) & 0xff) *   45) +
-                 (((group      ) & 0xff) * 2025)) & 0xffff;
+                ((((group >> 16U) & 0xffU)       ) +
+                 (((group >>  8U) & 0xffU) *   45) +
+                 (((group       ) & 0xffU) * 2025)) & 0xffffU;
 
             // Append the octets to the output vector
-            output.push_back((octet_pair >> 8) & 0xff);
-            output.push_back((octet_pair     ) & 0xff);
+            output.push_back((octet_pair >> 8U) & 0xffU);
+            output.push_back((octet_pair      ) & 0xffU);
 
             // Reset group data
             group_size = 0;
@@ -309,8 +309,8 @@ std::vector<std::uint8_t> Decode(std::string_view input)
         // Anything other than two octets would indicate a string length error
         if (group_size != 2) return {};
 
-        output.push_back(  ((group >> 8) & 0xff) +
-                         ((((group     ) & 0xff) * 45) & 0xff));
+        output.push_back(  ((group >> 8U) & 0xffU) +
+                         ((((group      ) & 0xffU) * 45) & 0xffU));
     }
 
     return output;

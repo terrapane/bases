@@ -171,8 +171,9 @@ std::string Encode(std::span<const std::uint8_t> input)
     for (const std::uint8_t octet : input)
     {
         // Write out the two hex characters representing this octet
-        output += std::span(Base16Table)[(octet >> 4) & 0x0f];
-        output += std::span(Base16Table)[(octet     ) & 0x0f];
+        output += std::span(
+            Base16Table)[static_cast<std::uint8_t>(octet >> 4U) & 0x0fU];
+        output += std::span(Base16Table)[(octet      ) & 0x0fU];
     }
 
     return output;
@@ -221,10 +222,10 @@ std::vector<std::uint8_t> Decode(std::string_view input)
         if (octet == InvalidBase16Character) continue;
 
         // Shift the group by 4 bits (no effect if group == 0)
-        group <<= 4;
+        group <<= 4U;
 
         // Add these 4 bits to the group
-        group |= (octet & 0x0f);
+        group |= octet & 0x0fU;
 
         // Increment the group size
         group_size += 4;
@@ -233,7 +234,7 @@ std::vector<std::uint8_t> Decode(std::string_view input)
         if (group_size == 8)
         {
             // Append the octet to the output vector
-            output.push_back(group & 0xff);
+            output.push_back(group & 0xffU);
 
             // Reset group data
             group_size = 0;

@@ -192,7 +192,7 @@ std::string Encode(std::span<const std::uint8_t> input)
     for (const std::uint8_t octet : input)
     {
         // Shift the group 8 bits (no effect if group has no useful data bits)
-        group <<= 8;
+        group <<= 8U;
 
         // Add this octet to the group
         group |= static_cast<std::uint8_t>(octet);
@@ -205,7 +205,7 @@ std::string Encode(std::span<const std::uint8_t> input)
             // Convert the top most significant 5 bits using the Base32Table,
             // appending the Base32 character to the string
             output +=
-                std::span(Base32Table)[(group >> (group_size - 5)) & 0x1f];
+                std::span(Base32Table)[(group >> (group_size - 5)) & 0x1fU];
 
             // Note that 5 bits were outputted
             quantum++;
@@ -227,7 +227,7 @@ std::string Encode(std::span<const std::uint8_t> input)
 
         // Convert the residual 5 bits using the Base32Table, appending the
         // Base32 character to the string
-        output += std::span(Base32Table)[group & 0x1f];
+        output += std::span(Base32Table)[group & 0x1fU];
 
         // Note that 5 bits were outputted
         quantum++;
@@ -291,10 +291,10 @@ std::vector<std::uint8_t> Decode(std::string_view input)
         if (octet == InvalidBase32Character) continue;
 
         // Shift the group by 5 bits (no effect if group == 0)
-        group <<= 5;
+        group <<= 5U;
 
         // Add these 5 bits to the group
-        group |= (octet & 0x1f);
+        group |= octet & 0x1fU;
 
         // Increment the group size
         group_size += 5;
@@ -303,7 +303,7 @@ std::vector<std::uint8_t> Decode(std::string_view input)
         if (group_size >= 8)
         {
             // Append the octet to the output vector
-            output.push_back((group >> (group_size - 8)) & 0xff);
+            output.push_back((group >> (group_size - 8)) & 0xffU);
 
             // Adjust the group size value
             group_size -= 8;

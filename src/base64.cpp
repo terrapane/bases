@@ -198,7 +198,7 @@ std::string Encode(std::span<const std::uint8_t> input)
     for (const std::uint8_t octet : input)
     {
         // Shift the group 8 bits (no effect if group == 0)
-        group <<= 8;
+        group <<= 8U;
 
         // Add this octet to the group
         group |= octet;
@@ -211,10 +211,10 @@ std::string Encode(std::span<const std::uint8_t> input)
         {
             // Convert 6 bits at a time using the Base64Table, appending Base64
             // characters to the string for each of the 6 bits
-            output += table_span[(group >> 18) & 0x3f];
-            output += table_span[(group >> 12) & 0x3f];
-            output += table_span[(group >> 6 ) & 0x3f];
-            output += table_span[(group      ) & 0x3f];
+            output += table_span[(group >> 18U) & 0x3fU];
+            output += table_span[(group >> 12U) & 0x3fU];
+            output += table_span[(group >>  6U) & 0x3fU];
+            output += table_span[(group       ) & 0x3fU];
 
             // Reset group data
             group_size = 0;
@@ -229,8 +229,8 @@ std::string Encode(std::span<const std::uint8_t> input)
         group <<= (24 - group_size);
 
         // Convert 6 bits at a time using the Base64Table
-        output += table_span[(group >> 18) & 0x3f];
-        output += table_span[(group >> 12) & 0x3f];
+        output += table_span[(group >> 18U) & 0x3fU];
+        output += table_span[(group >> 12U) & 0x3fU];
         if (group_size == 8)
         {
             // We have only one residual octet, so we append two padding octets
@@ -241,7 +241,7 @@ std::string Encode(std::span<const std::uint8_t> input)
         {
             // We have two residual octets, so we have an additional 6 bits
             // to output and then one padding octet
-            output += table_span[(group >> 6) & 0x3f];
+            output += table_span[(group >> 6U) & 0x3fU];
             output += Base64PaddingCharacter;
         }
     }
@@ -298,10 +298,10 @@ std::vector<std::uint8_t> Decode(std::string_view input)
         if (octet == InvalidBase64Character) continue;
 
         // Shift the group by 6 bits (no effect if group == 0)
-        group <<= 6;
+        group <<= 6U;
 
         // Add these 6 bits to the group
-        group |= (octet & 0x3f);
+        group |= octet & 0x3fU;
 
         // Increment the group size to represents the number of data bits
         group_size += 6;
@@ -310,9 +310,9 @@ std::vector<std::uint8_t> Decode(std::string_view input)
         if (group_size == 24)
         {
             // Append the octets to the output vector
-            output.push_back((group >> 16) & 0xff);
-            output.push_back((group >>  8) & 0xff);
-            output.push_back((group      ) & 0xff);
+            output.push_back((group >> 16U) & 0xffU);
+            output.push_back((group >>  8U) & 0xffU);
+            output.push_back((group       ) & 0xffU);
 
             // Reset group data
             group_size = 0;
@@ -327,11 +327,11 @@ std::vector<std::uint8_t> Decode(std::string_view input)
         group <<= (24 - group_size);
 
         // Append the octets to the output vector
-        output.push_back((group >> 16) & 0xff);
+        output.push_back((group >> 16U) & 0xffU);
         if (group_size >= 16)
         {
-            output.push_back((group >> 8) & 0xff);
-            if (group_size == 24) output.push_back((group) & 0xff);
+            output.push_back((group >> 8U) & 0xffU);
+            if (group_size == 24) output.push_back((group) & 0xffU);
         }
     }
 
