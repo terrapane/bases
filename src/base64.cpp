@@ -49,7 +49,7 @@ constexpr char Base64PaddingCharacter = '=';
 constexpr std::uint8_t InvalidBase64Character = 255;
 
 // Function that will tell us the integer value for any given Base64 character
-constexpr std::uint8_t B64ToInt(std::uint8_t x) noexcept
+consteval std::uint8_t B64ToInt(std::uint8_t x) noexcept
 {
     // NOLINTBEGIN(readability-avoid-nested-conditional-operator)
     return (x) == 'A' ?  0 : (x) == 'B' ?  1 : (x) == 'C' ?  2 :
@@ -77,62 +77,21 @@ constexpr std::uint8_t B64ToInt(std::uint8_t x) noexcept
     // NOLINTEND(readability-avoid-nested-conditional-operator)
 }
 
-// Define the table for converting from Base64 characters to integer values
-const std::array<std::uint8_t, 256> Base64ReverseTable =
+// Reverse table generator function
+consteval std::array<std::uint8_t, 256> GenerateReverseTable()
 {
-    B64ToInt(0),   B64ToInt(1),   B64ToInt(2),   B64ToInt(3),   B64ToInt(4),
-    B64ToInt(5),   B64ToInt(6),   B64ToInt(7),   B64ToInt(8),   B64ToInt(9),
-    B64ToInt(10),  B64ToInt(11),  B64ToInt(12),  B64ToInt(13),  B64ToInt(14),
-    B64ToInt(15),  B64ToInt(16),  B64ToInt(17),  B64ToInt(18),  B64ToInt(19),
-    B64ToInt(20),  B64ToInt(21),  B64ToInt(22),  B64ToInt(23),  B64ToInt(24),
-    B64ToInt(25),  B64ToInt(26),  B64ToInt(27),  B64ToInt(28),  B64ToInt(29),
-    B64ToInt(30),  B64ToInt(31),  B64ToInt(32),  B64ToInt(33),  B64ToInt(34),
-    B64ToInt(35),  B64ToInt(36),  B64ToInt(37),  B64ToInt(38),  B64ToInt(39),
-    B64ToInt(40),  B64ToInt(41),  B64ToInt(42),  B64ToInt(43),  B64ToInt(44),
-    B64ToInt(45),  B64ToInt(46),  B64ToInt(47),  B64ToInt(48),  B64ToInt(49),
-    B64ToInt(50),  B64ToInt(51),  B64ToInt(52),  B64ToInt(53),  B64ToInt(54),
-    B64ToInt(55),  B64ToInt(56),  B64ToInt(57),  B64ToInt(58),  B64ToInt(59),
-    B64ToInt(60),  B64ToInt(61),  B64ToInt(62),  B64ToInt(63),  B64ToInt(64),
-    B64ToInt(65),  B64ToInt(66),  B64ToInt(67),  B64ToInt(68),  B64ToInt(69),
-    B64ToInt(70),  B64ToInt(71),  B64ToInt(72),  B64ToInt(73),  B64ToInt(74),
-    B64ToInt(75),  B64ToInt(76),  B64ToInt(77),  B64ToInt(78),  B64ToInt(79),
-    B64ToInt(80),  B64ToInt(81),  B64ToInt(82),  B64ToInt(83),  B64ToInt(84),
-    B64ToInt(85),  B64ToInt(86),  B64ToInt(87),  B64ToInt(88),  B64ToInt(89),
-    B64ToInt(90),  B64ToInt(91),  B64ToInt(92),  B64ToInt(93),  B64ToInt(94),
-    B64ToInt(95),  B64ToInt(96),  B64ToInt(97),  B64ToInt(98),  B64ToInt(99),
-    B64ToInt(100), B64ToInt(101), B64ToInt(102), B64ToInt(103), B64ToInt(104),
-    B64ToInt(105), B64ToInt(106), B64ToInt(107), B64ToInt(108), B64ToInt(109),
-    B64ToInt(110), B64ToInt(111), B64ToInt(112), B64ToInt(113), B64ToInt(114),
-    B64ToInt(115), B64ToInt(116), B64ToInt(117), B64ToInt(118), B64ToInt(119),
-    B64ToInt(120), B64ToInt(121), B64ToInt(122), B64ToInt(123), B64ToInt(124),
-    B64ToInt(125), B64ToInt(126), B64ToInt(127), B64ToInt(128), B64ToInt(129),
-    B64ToInt(130), B64ToInt(131), B64ToInt(132), B64ToInt(133), B64ToInt(134),
-    B64ToInt(135), B64ToInt(136), B64ToInt(137), B64ToInt(138), B64ToInt(139),
-    B64ToInt(140), B64ToInt(141), B64ToInt(142), B64ToInt(143), B64ToInt(144),
-    B64ToInt(145), B64ToInt(146), B64ToInt(147), B64ToInt(148), B64ToInt(149),
-    B64ToInt(150), B64ToInt(151), B64ToInt(152), B64ToInt(153), B64ToInt(154),
-    B64ToInt(155), B64ToInt(156), B64ToInt(157), B64ToInt(158), B64ToInt(159),
-    B64ToInt(160), B64ToInt(161), B64ToInt(162), B64ToInt(163), B64ToInt(164),
-    B64ToInt(165), B64ToInt(166), B64ToInt(167), B64ToInt(168), B64ToInt(169),
-    B64ToInt(170), B64ToInt(171), B64ToInt(172), B64ToInt(173), B64ToInt(174),
-    B64ToInt(175), B64ToInt(176), B64ToInt(177), B64ToInt(178), B64ToInt(179),
-    B64ToInt(180), B64ToInt(181), B64ToInt(182), B64ToInt(183), B64ToInt(184),
-    B64ToInt(185), B64ToInt(186), B64ToInt(187), B64ToInt(188), B64ToInt(189),
-    B64ToInt(190), B64ToInt(191), B64ToInt(192), B64ToInt(193), B64ToInt(194),
-    B64ToInt(195), B64ToInt(196), B64ToInt(197), B64ToInt(198), B64ToInt(199),
-    B64ToInt(200), B64ToInt(201), B64ToInt(202), B64ToInt(203), B64ToInt(204),
-    B64ToInt(205), B64ToInt(206), B64ToInt(207), B64ToInt(208), B64ToInt(209),
-    B64ToInt(210), B64ToInt(211), B64ToInt(212), B64ToInt(213), B64ToInt(214),
-    B64ToInt(215), B64ToInt(216), B64ToInt(217), B64ToInt(218), B64ToInt(219),
-    B64ToInt(220), B64ToInt(221), B64ToInt(222), B64ToInt(223), B64ToInt(224),
-    B64ToInt(225), B64ToInt(226), B64ToInt(227), B64ToInt(228), B64ToInt(229),
-    B64ToInt(230), B64ToInt(231), B64ToInt(232), B64ToInt(233), B64ToInt(234),
-    B64ToInt(235), B64ToInt(236), B64ToInt(237), B64ToInt(238), B64ToInt(239),
-    B64ToInt(240), B64ToInt(241), B64ToInt(242), B64ToInt(243), B64ToInt(244),
-    B64ToInt(245), B64ToInt(246), B64ToInt(247), B64ToInt(248), B64ToInt(249),
-    B64ToInt(250), B64ToInt(251), B64ToInt(252), B64ToInt(253), B64ToInt(254),
-    B64ToInt(255)
-};
+    std::array<std::uint8_t, 256> table{};
+
+    for (std::size_t i = 0; i < 256; i++)
+    {
+        table[i] = B64ToInt(static_cast<std::uint8_t>(i));
+    }
+
+    return table;
+}
+
+// Define the table for converting from Base64 characters to integer values
+const std::array<std::uint8_t, 256> Base64ReverseTable = GenerateReverseTable();
 
 } // namespace
 

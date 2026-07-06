@@ -1,5 +1,10 @@
 # Change Log
 
+v1.0.5
+
+- Changed the reverse tables so that they are computed using consteval
+  functions in order to reduce potential for errors and lines of code
+
 v1.0.4
 
 - Removed legacy C macros

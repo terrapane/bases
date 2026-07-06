@@ -49,7 +49,7 @@ const std::array<char, 58> Base58Table =
 constexpr std::uint8_t InvalidBase58Character = 255;
 
 // Function that will tell us the integer value for any given Base58 character
-constexpr std::uint8_t B58ToInt(std::uint8_t x) noexcept
+consteval std::uint8_t B58ToInt(std::uint8_t x) noexcept
 {
     // NOLINTBEGIN(readability-avoid-nested-conditional-operator)
     return (x) == '1' ?  0 : (x) == '2' ?  1 : (x) == '3' ?  2 :
@@ -75,62 +75,21 @@ constexpr std::uint8_t B58ToInt(std::uint8_t x) noexcept
     // NOLINTEND(readability-avoid-nested-conditional-operator)
 }
 
-// Define the table for converting from Base58 characters to integer values
-const std::array<std::uint8_t, 256> Base58ReverseTable =
+// Reverse table generator function
+consteval std::array<std::uint8_t, 256> GenerateReverseTable()
 {
-    B58ToInt(0),   B58ToInt(1),   B58ToInt(2),   B58ToInt(3),   B58ToInt(4),
-    B58ToInt(5),   B58ToInt(6),   B58ToInt(7),   B58ToInt(8),   B58ToInt(9),
-    B58ToInt(10),  B58ToInt(11),  B58ToInt(12),  B58ToInt(13),  B58ToInt(14),
-    B58ToInt(15),  B58ToInt(16),  B58ToInt(17),  B58ToInt(18),  B58ToInt(19),
-    B58ToInt(20),  B58ToInt(21),  B58ToInt(22),  B58ToInt(23),  B58ToInt(24),
-    B58ToInt(25),  B58ToInt(26),  B58ToInt(27),  B58ToInt(28),  B58ToInt(29),
-    B58ToInt(30),  B58ToInt(31),  B58ToInt(32),  B58ToInt(33),  B58ToInt(34),
-    B58ToInt(35),  B58ToInt(36),  B58ToInt(37),  B58ToInt(38),  B58ToInt(39),
-    B58ToInt(40),  B58ToInt(41),  B58ToInt(42),  B58ToInt(43),  B58ToInt(44),
-    B58ToInt(58),  B58ToInt(46),  B58ToInt(47),  B58ToInt(48),  B58ToInt(49),
-    B58ToInt(50),  B58ToInt(51),  B58ToInt(52),  B58ToInt(53),  B58ToInt(54),
-    B58ToInt(55),  B58ToInt(56),  B58ToInt(57),  B58ToInt(58),  B58ToInt(59),
-    B58ToInt(60),  B58ToInt(61),  B58ToInt(62),  B58ToInt(63),  B58ToInt(64),
-    B58ToInt(65),  B58ToInt(66),  B58ToInt(67),  B58ToInt(68),  B58ToInt(69),
-    B58ToInt(70),  B58ToInt(71),  B58ToInt(72),  B58ToInt(73),  B58ToInt(74),
-    B58ToInt(75),  B58ToInt(76),  B58ToInt(77),  B58ToInt(78),  B58ToInt(79),
-    B58ToInt(80),  B58ToInt(81),  B58ToInt(82),  B58ToInt(83),  B58ToInt(84),
-    B58ToInt(85),  B58ToInt(86),  B58ToInt(87),  B58ToInt(88),  B58ToInt(89),
-    B58ToInt(90),  B58ToInt(91),  B58ToInt(92),  B58ToInt(93),  B58ToInt(94),
-    B58ToInt(95),  B58ToInt(96),  B58ToInt(97),  B58ToInt(98),  B58ToInt(99),
-    B58ToInt(100), B58ToInt(101), B58ToInt(102), B58ToInt(103), B58ToInt(104),
-    B58ToInt(105), B58ToInt(106), B58ToInt(107), B58ToInt(108), B58ToInt(109),
-    B58ToInt(110), B58ToInt(111), B58ToInt(112), B58ToInt(113), B58ToInt(114),
-    B58ToInt(115), B58ToInt(116), B58ToInt(117), B58ToInt(118), B58ToInt(119),
-    B58ToInt(120), B58ToInt(121), B58ToInt(122), B58ToInt(123), B58ToInt(124),
-    B58ToInt(125), B58ToInt(126), B58ToInt(127), B58ToInt(128), B58ToInt(129),
-    B58ToInt(130), B58ToInt(131), B58ToInt(132), B58ToInt(133), B58ToInt(134),
-    B58ToInt(135), B58ToInt(136), B58ToInt(137), B58ToInt(138), B58ToInt(139),
-    B58ToInt(140), B58ToInt(141), B58ToInt(142), B58ToInt(143), B58ToInt(144),
-    B58ToInt(158), B58ToInt(146), B58ToInt(147), B58ToInt(148), B58ToInt(149),
-    B58ToInt(150), B58ToInt(151), B58ToInt(152), B58ToInt(153), B58ToInt(154),
-    B58ToInt(155), B58ToInt(156), B58ToInt(157), B58ToInt(158), B58ToInt(159),
-    B58ToInt(160), B58ToInt(161), B58ToInt(162), B58ToInt(163), B58ToInt(164),
-    B58ToInt(165), B58ToInt(166), B58ToInt(167), B58ToInt(168), B58ToInt(169),
-    B58ToInt(170), B58ToInt(171), B58ToInt(172), B58ToInt(173), B58ToInt(174),
-    B58ToInt(175), B58ToInt(176), B58ToInt(177), B58ToInt(178), B58ToInt(179),
-    B58ToInt(180), B58ToInt(181), B58ToInt(182), B58ToInt(183), B58ToInt(184),
-    B58ToInt(185), B58ToInt(186), B58ToInt(187), B58ToInt(188), B58ToInt(189),
-    B58ToInt(190), B58ToInt(191), B58ToInt(192), B58ToInt(193), B58ToInt(194),
-    B58ToInt(195), B58ToInt(196), B58ToInt(197), B58ToInt(198), B58ToInt(199),
-    B58ToInt(200), B58ToInt(201), B58ToInt(202), B58ToInt(203), B58ToInt(204),
-    B58ToInt(205), B58ToInt(206), B58ToInt(207), B58ToInt(208), B58ToInt(209),
-    B58ToInt(210), B58ToInt(211), B58ToInt(212), B58ToInt(213), B58ToInt(214),
-    B58ToInt(215), B58ToInt(216), B58ToInt(217), B58ToInt(218), B58ToInt(219),
-    B58ToInt(220), B58ToInt(221), B58ToInt(222), B58ToInt(223), B58ToInt(224),
-    B58ToInt(225), B58ToInt(226), B58ToInt(227), B58ToInt(228), B58ToInt(229),
-    B58ToInt(230), B58ToInt(231), B58ToInt(232), B58ToInt(233), B58ToInt(234),
-    B58ToInt(235), B58ToInt(236), B58ToInt(237), B58ToInt(238), B58ToInt(239),
-    B58ToInt(240), B58ToInt(241), B58ToInt(242), B58ToInt(243), B58ToInt(244),
-    B58ToInt(245), B58ToInt(246), B58ToInt(247), B58ToInt(248), B58ToInt(249),
-    B58ToInt(250), B58ToInt(251), B58ToInt(252), B58ToInt(253), B58ToInt(254),
-    B58ToInt(255)
-};
+    std::array<std::uint8_t, 256> table{};
+
+    for (std::size_t i = 0; i < 256; i++)
+    {
+        table[i] = B58ToInt(static_cast<std::uint8_t>(i));
+    }
+
+    return table;
+}
+
+// Define the table for converting from Base58 characters to integer values
+const std::array<std::uint8_t, 256> Base58ReverseTable = GenerateReverseTable();
 
 } // namespace
 

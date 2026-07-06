@@ -45,7 +45,7 @@ const std::array<char, 45> Base45Table =
 constexpr std::uint8_t InvalidBase45Character = 255;
 
 // Function that will tell us the integer value for any given Base45 character
-constexpr std::uint8_t B45ToInt(std::uint8_t x) noexcept
+consteval std::uint8_t B45ToInt(std::uint8_t x) noexcept
 {
     // NOLINTBEGIN(readability-avoid-nested-conditional-operator)
     return (x) == '0' ?  0 : (x) == '1' ?  1 : (x) == '2' ?  2 :
@@ -67,62 +67,21 @@ constexpr std::uint8_t B45ToInt(std::uint8_t x) noexcept
     // NOLINTEND(readability-avoid-nested-conditional-operator)
 }
 
-// Define the table for converting from Base45 characters to integer values
-const std::array<std::uint8_t, 256> Base45ReverseTable =
+// Reverse table generator function
+consteval std::array<std::uint8_t, 256> GenerateReverseTable()
 {
-    B45ToInt(0),   B45ToInt(1),   B45ToInt(2),   B45ToInt(3),   B45ToInt(4),
-    B45ToInt(5),   B45ToInt(6),   B45ToInt(7),   B45ToInt(8),   B45ToInt(9),
-    B45ToInt(10),  B45ToInt(11),  B45ToInt(12),  B45ToInt(13),  B45ToInt(14),
-    B45ToInt(15),  B45ToInt(16),  B45ToInt(17),  B45ToInt(18),  B45ToInt(19),
-    B45ToInt(20),  B45ToInt(21),  B45ToInt(22),  B45ToInt(23),  B45ToInt(24),
-    B45ToInt(25),  B45ToInt(26),  B45ToInt(27),  B45ToInt(28),  B45ToInt(29),
-    B45ToInt(30),  B45ToInt(31),  B45ToInt(32),  B45ToInt(33),  B45ToInt(34),
-    B45ToInt(35),  B45ToInt(36),  B45ToInt(37),  B45ToInt(38),  B45ToInt(39),
-    B45ToInt(40),  B45ToInt(41),  B45ToInt(42),  B45ToInt(43),  B45ToInt(44),
-    B45ToInt(45),  B45ToInt(46),  B45ToInt(47),  B45ToInt(48),  B45ToInt(49),
-    B45ToInt(50),  B45ToInt(51),  B45ToInt(52),  B45ToInt(53),  B45ToInt(54),
-    B45ToInt(55),  B45ToInt(56),  B45ToInt(57),  B45ToInt(58),  B45ToInt(59),
-    B45ToInt(60),  B45ToInt(61),  B45ToInt(62),  B45ToInt(63),  B45ToInt(64),
-    B45ToInt(65),  B45ToInt(66),  B45ToInt(67),  B45ToInt(68),  B45ToInt(69),
-    B45ToInt(70),  B45ToInt(71),  B45ToInt(72),  B45ToInt(73),  B45ToInt(74),
-    B45ToInt(75),  B45ToInt(76),  B45ToInt(77),  B45ToInt(78),  B45ToInt(79),
-    B45ToInt(80),  B45ToInt(81),  B45ToInt(82),  B45ToInt(83),  B45ToInt(84),
-    B45ToInt(85),  B45ToInt(86),  B45ToInt(87),  B45ToInt(88),  B45ToInt(89),
-    B45ToInt(90),  B45ToInt(91),  B45ToInt(92),  B45ToInt(93),  B45ToInt(94),
-    B45ToInt(95),  B45ToInt(96),  B45ToInt(97),  B45ToInt(98),  B45ToInt(99),
-    B45ToInt(100), B45ToInt(101), B45ToInt(102), B45ToInt(103), B45ToInt(104),
-    B45ToInt(105), B45ToInt(106), B45ToInt(107), B45ToInt(108), B45ToInt(109),
-    B45ToInt(110), B45ToInt(111), B45ToInt(112), B45ToInt(113), B45ToInt(114),
-    B45ToInt(115), B45ToInt(116), B45ToInt(117), B45ToInt(118), B45ToInt(119),
-    B45ToInt(120), B45ToInt(121), B45ToInt(122), B45ToInt(123), B45ToInt(124),
-    B45ToInt(125), B45ToInt(126), B45ToInt(127), B45ToInt(128), B45ToInt(129),
-    B45ToInt(130), B45ToInt(131), B45ToInt(132), B45ToInt(133), B45ToInt(134),
-    B45ToInt(135), B45ToInt(136), B45ToInt(137), B45ToInt(138), B45ToInt(139),
-    B45ToInt(140), B45ToInt(141), B45ToInt(142), B45ToInt(143), B45ToInt(144),
-    B45ToInt(145), B45ToInt(146), B45ToInt(147), B45ToInt(148), B45ToInt(149),
-    B45ToInt(150), B45ToInt(151), B45ToInt(152), B45ToInt(153), B45ToInt(154),
-    B45ToInt(155), B45ToInt(156), B45ToInt(157), B45ToInt(158), B45ToInt(159),
-    B45ToInt(160), B45ToInt(161), B45ToInt(162), B45ToInt(163), B45ToInt(164),
-    B45ToInt(165), B45ToInt(166), B45ToInt(167), B45ToInt(168), B45ToInt(169),
-    B45ToInt(170), B45ToInt(171), B45ToInt(172), B45ToInt(173), B45ToInt(174),
-    B45ToInt(175), B45ToInt(176), B45ToInt(177), B45ToInt(178), B45ToInt(179),
-    B45ToInt(180), B45ToInt(181), B45ToInt(182), B45ToInt(183), B45ToInt(184),
-    B45ToInt(185), B45ToInt(186), B45ToInt(187), B45ToInt(188), B45ToInt(189),
-    B45ToInt(190), B45ToInt(191), B45ToInt(192), B45ToInt(193), B45ToInt(194),
-    B45ToInt(195), B45ToInt(196), B45ToInt(197), B45ToInt(198), B45ToInt(199),
-    B45ToInt(200), B45ToInt(201), B45ToInt(202), B45ToInt(203), B45ToInt(204),
-    B45ToInt(205), B45ToInt(206), B45ToInt(207), B45ToInt(208), B45ToInt(209),
-    B45ToInt(210), B45ToInt(211), B45ToInt(212), B45ToInt(213), B45ToInt(214),
-    B45ToInt(215), B45ToInt(216), B45ToInt(217), B45ToInt(218), B45ToInt(219),
-    B45ToInt(220), B45ToInt(221), B45ToInt(222), B45ToInt(223), B45ToInt(224),
-    B45ToInt(225), B45ToInt(226), B45ToInt(227), B45ToInt(228), B45ToInt(229),
-    B45ToInt(230), B45ToInt(231), B45ToInt(232), B45ToInt(233), B45ToInt(234),
-    B45ToInt(235), B45ToInt(236), B45ToInt(237), B45ToInt(238), B45ToInt(239),
-    B45ToInt(240), B45ToInt(241), B45ToInt(242), B45ToInt(243), B45ToInt(244),
-    B45ToInt(245), B45ToInt(246), B45ToInt(247), B45ToInt(248), B45ToInt(249),
-    B45ToInt(250), B45ToInt(251), B45ToInt(252), B45ToInt(253), B45ToInt(254),
-    B45ToInt(255)
-};
+    std::array<std::uint8_t, 256> table{};
+
+    for (std::size_t i = 0; i < 256; i++)
+    {
+        table[i] = B45ToInt(static_cast<std::uint8_t>(i));
+    }
+
+    return table;
+}
+
+// Define the table for converting from Base45 characters to integer values
+const std::array<std::uint8_t, 256> Base45ReverseTable = GenerateReverseTable();
 
 } // namespace
 
