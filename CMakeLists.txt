@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 # Define the Base-N Library project
 project(bases
-        VERSION 1.0.4.0
+        VERSION 1.0.5.0
         DESCRIPTION "Base-N Encoder/Decoder Library"
         LANGUAGES CXX)
 

@@ -4,6 +4,7 @@ v1.0.5
 
 - Changed the reverse tables so that they are computed using consteval
   functions in order to reduce potential for errors and lines of code
+- Made compiler warnings stricter
 
 v1.0.4
 

@@ -173,7 +173,8 @@ std::string Encode(std::span<const std::uint8_t> input)
                 // Increment the output length
                 output_length++;
             }
-            carry += static_cast<std::uint8_t>(output[j - zeros]) << 8U;
+            carry += static_cast<std::uint32_t>(
+                static_cast<std::uint8_t>(output[j - zeros]) << 8U);
             output[j - zeros] =
                 static_cast<char>(static_cast<std::uint8_t>(carry % 58));
             carry /= 58;
@@ -289,7 +290,7 @@ std::vector<std::uint8_t> Decode(std::string_view input)
                 output_length++;
             }
             carry += 58 * static_cast<std::uint8_t>(output[j]);
-            output[j] = static_cast<char>(carry % 256);
+            output[j] = static_cast<std::uint8_t>(carry % 256);
             carry /= 256;
         }
 
